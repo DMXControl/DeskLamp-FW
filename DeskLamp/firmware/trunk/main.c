@@ -30,7 +30,7 @@ static uchar buffer[8];
 static uchar currentPosition, bytesRemaining;
 
 /** USB Descriptor */
-PROGMEM char usbHidReportDescriptor[124] = {
+PROGMEM const char usbHidReportDescriptor[124] = {
     0x05, 0x08,                    // USAGE_PAGE (LEDs)
     0x09, 0x4b,                    // USAGE (Generic Indicator)
     0xa1, 0x01,                    // COLLECTION (Application)
