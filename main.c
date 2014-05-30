@@ -12,6 +12,10 @@
 *
 *
 * Open items:
+* Fuses:
+* High: 0xDF
+* Low:  0xEE
+* Extended: 0xFF
 *
 */
 
