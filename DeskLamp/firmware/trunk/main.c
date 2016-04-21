@@ -10,15 +10,15 @@
 *  RGB Color
 *  128 brightness steps
 *
-*
 * Open items:
-* Fuses:
-* High: 0xDF
-* Low:  0xEE
-* Extended: 0xFF
 *
+* Fuses:
+*  High: 0xDF
+*  Low:  0xEE
+*  Extended: 0xFF
 */
 
+#include <avr/signature.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
@@ -29,6 +29,12 @@
 #include "usbconfig.h"
 #include "usbdrv/usbdrv.h"
 #include "desklamp.h"
+
+FUSES = {
+	.low = 0xEE,
+	.high = 0xDF,
+	.extended = 0xFF,
+};
 
 static uchar buffer[8];
 static uchar currentPosition, bytesRemaining;
