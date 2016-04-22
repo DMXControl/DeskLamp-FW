@@ -26,7 +26,7 @@
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.release.867825378" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.release">
 								<option id="de.innot.avreclipse.assembler.option.debug.level.2105339236" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level" value="de.innot.avreclipse.assembler.option.debug.level.none" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.asm.option.flags.550944416" name="Other GCC Flags" superClass="de.innot.avreclipse.asm.option.flags" value="-DF_CPU=${AVRTARGETFCPU}" valueType="string"/>
-								<option id="de.innot.avreclipse.asm.option.omitfcpu.1850788312" superClass="de.innot.avreclipse.asm.option.omitfcpu" value="true" valueType="boolean"/>
+								<option id="de.innot.avreclipse.asm.option.omitfcpu.1850788312" name="Omit F_CPU" superClass="de.innot.avreclipse.asm.option.omitfcpu" value="true" valueType="boolean"/>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.205173429" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.938004283" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release">
