@@ -128,7 +128,7 @@ void desklamp_init_pwm(void) {
 	ICR1 = 0xff;
 
 	// set prescaler 256
-	TCCR0B |= (1 << CS02);						// prescaler 256 	-> 183Hz
+	TCCR0B |= (1 << CS02);						// prescaler 256 	-> 183,10546875 Hz
 	if (desklamp.colormode == DESKLAMP_COLORMODE_RGB) {
 		TCCR1B |= (1 << CS12);					// prescaler 256	->  90Hz
 	}
@@ -363,11 +363,12 @@ void desklamp_update_pwm(void){
 		OCR1A = pgm_read_byte(&(pwmtable[(((uint16_t)desklamp.g * dimmer) >> 9)]));
 		OCR1B = pgm_read_byte(&(pwmtable[(((uint16_t)desklamp.b * dimmer) >> 9)]));
 	} else {	// COLORMODE_MONO
-		if (desklamp.dimmer == 0) {
+		uint8_t pwm = pgm_read_byte(&(pwmtable[((uint8_t)dimmer >> 1)]));
+		if (pwm == 0) {
 			desklamp_set_led(1, OFF);
 			desklamp_config_channel(1, DISABLE);
 		} else {
-			OCR0B = pgm_read_byte(&(pwmtable[((uint8_t)dimmer >> 1)]));
+			OCR0B = pwm;
 			desklamp_config_channel(1, ENABLE);
 		}
 	}
