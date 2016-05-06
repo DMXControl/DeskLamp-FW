@@ -67,7 +67,7 @@
 /** @} */
 
 /** OPTIONS */
-#define COLORMODE					DESKLAMP_COLORMODE_RGB
+#define COLORMODE					DESKLAMP_COLORMODE_MONO
 #define USBADAPTER					1
 #define STROBE						1
 
