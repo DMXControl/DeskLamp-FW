@@ -39,6 +39,27 @@ FUSES = {
 static uchar buffer[8];
 static uchar currentPosition, bytesRemaining;
 
+#if STROBE == 1
+const PROGMEM uint8_t strobetable[256] = {
+		  0, 164, 149, 136, 125, 116, 108, 101,  95,  90,  85,  81,  77,  73,  70,  67,
+	 	 64,  62,  60,  57,  55,  54,  52,  50,  49,  47,  46,  44,  43,  42,  41,  40,
+		 39,  38,  37,  36,  35,  35,  34,  33,  32,  32,  31,  31,  30,  29,  29,  28,
+		 28, 27, 27, 26, 26, 26, 25, 25, 24, 24, 24, 23, 23, 23, 22, 22,
+		 22, 21, 21, 21, 20, 20, 20, 20, 19, 19, 19, 19, 18, 18, 18, 18,
+		 18, 17, 17, 17, 17, 17, 16, 16, 16, 16, 16, 16, 15, 15, 15, 15,
+		 15, 15, 15, 14, 14, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13,
+		 13, 13, 13, 13, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 11, 11,
+		 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10,
+		 10, 10, 10, 10, 10, 10, 10, 10, 10,  9,  9,  9,  9,  9,  9,  9,
+		 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8,
+		 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+		 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+		 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6,
+		 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+		 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6
+};
+#endif
+
 /** USB Descriptor */
 PROGMEM const char usbHidReportDescriptor[124] = {
     0x05, 0x08,                    // USAGE_PAGE (LEDs)
@@ -342,8 +363,8 @@ int main(void) {
 					desklamp_set_blackout(0);
 					desklamp_update_pwm();
 					lastStrobe = curStrobe;
-				} else if (curStrobe > 0) { // Strobe on [ 0... 15Hz -> 0...255 ]
-					curStrobe = 2000 + (50 * (255 - curStrobe));
+				} else if (curStrobe > 0) { // Strobe on [ 1,1165 ... 30,5176 Hz -> 1...255 ]
+					curStrobe = pgm_read_byte(&(strobetable[curStrobe])) - 1;
 					if (lastStrobe == 0) {
 						desklamp_set_blackout(1);
 						desklamp_update_pwm();
@@ -352,7 +373,7 @@ int main(void) {
 					if (count == curStrobe) {
 						desklamp_set_blackout(0);
 						desklamp_update_pwm();
-					} else if (count >= curStrobe + 2000) {
+					} else if (count >= curStrobe + 1) {
 						desklamp_set_blackout(1);
 						desklamp_update_pwm();
 						count = 0;
@@ -360,7 +381,7 @@ int main(void) {
 					count++;
 					lastStrobe = curStrobe;
 				}
-				TIFR0 &= ~(1 << TOV0);
+				TIFR0 |= (1 << TOV0); // Reset Interrupt flag
 			}
 #endif
 #if USBADAPTER == 1
