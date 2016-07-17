@@ -61,7 +61,7 @@ const PROGMEM uint8_t strobetable[256] = {
 #endif
 
 /** USB Descriptor */
-PROGMEM const char usbHidReportDescriptor[124] = {
+PROGMEM const char usbHidReportDescriptor[146] = {
     0x05, 0x08,                    // USAGE_PAGE (LEDs)
     0x09, 0x4b,                    // USAGE (Generic Indicator)
     0xa1, 0x01,                    // COLLECTION (Application)
@@ -127,6 +127,18 @@ PROGMEM const char usbHidReportDescriptor[124] = {
     0x85, 0x0A,                    //     REPORT_ID (10)
     0x95, 0x04,                    //     REPORT_COUNT (4)
     0x91, 0x00,                    //     OUTPUT (Data,Ary,Abs)
+    0xc0,                          //   END_COLLECTION
+    0xa1, 0x02,                    //   COLLECTION (Logical)
+    0x09, 0x47,                    //     USAGE (Usage Indicator Color)
+    0x85, 0x0B,                    //     REPORT_ID (11)
+    0x95, 0x01,                    //     REPORT_COUNT (1)
+    0xb1, 0x00,                    //     FEATURE (Data,Ary,Abs)
+    0xc0,                          //   END_COLLECTION
+    0xa1, 0x02,                    //   COLLECTION (Logical)
+    0x09, 0x47,                    //     USAGE (Usage Indicator Color)
+    0x85, 0x0C,                    //     REPORT_ID (12)
+    0x95, 0x01,                    //     REPORT_COUNT (1)
+    0xb1, 0x00,                    //     FEATURE (Data,Ary,Abs)
     0xc0,                          //   END_COLLECTION
     0xc0                           // END_COLLECTION
 };
@@ -201,12 +213,16 @@ usbMsgLen_t usbFunctionSetup(uchar setupData[8]) {
                     replyBuf[1] = desklamp_get_colormode();
                     return 2;
 
+        		case DESKLAMP_CMD_IS_ADAPTER:		/** get is adapter */
+                    replyBuf[1] = desklamp_is_adapter();
+                    return 2;
+
         		case DESKLAMP_CMD_GET_EXTUSB:		/** get external USB state */
-#if USBADAPTER == 1
-                    replyBuf[1] = desklamp_chk_extusb();
-#else
-                    replyBuf[1] = 0;
-#endif
+        			if (desklamp_is_adapter()) {
+        				replyBuf[1] = desklamp_chk_extusb();
+        			} else {
+        				replyBuf[1] = 0;
+        			}
                     return 2;
         	}
         	return 0; // should not get here
@@ -217,6 +233,7 @@ usbMsgLen_t usbFunctionSetup(uchar setupData[8]) {
         		case DESKLAMP_CMD_SET_RGB:
         		case DESKLAMP_CMD_SET_STROBE:
         		case DESKLAMP_CMD_SET_COLORMODE:
+        		case DESKLAMP_CMD_SET_ADAPTER:
         		case DESKLAMP_CMD_SET_SERIAL:
         			currentPosition = 0;                // initialize position index
         			bytesRemaining = rq->wLength.word;  // store the amount of data requested
@@ -265,9 +282,7 @@ uchar usbFunctionDescriptor(usbRequest_t *rq) {
 */
 int main(void) {
 	uint8_t  i;
-#if USBADAPTER
 	uint8_t lastExtUSB = 1;
-#endif
 #if STROBE == 1
 	uint16_t lastStrobe = 0;
 	uint16_t count = 0;
@@ -276,11 +291,10 @@ int main(void) {
 	/* set LED-ports to output */
 	desklamp_init();
 
-#if USBADAPTER == 1
-#else
-	// Enable PWM
-	desklamp_init_pwm();
-#endif
+	if (!desklamp_is_adapter()) {
+		// Enable PWM
+		desklamp_init_pwm();
+	}
 
 	/* enable Watchdog */
 	wdt_enable(WDTO_1S);
@@ -304,24 +318,24 @@ int main(void) {
 		wdt_reset();
 		usbPoll();
 
-#if USBADAPTER == 1
-		uint8_t extUSB = desklamp_chk_extusb();
-		if (extUSB != lastExtUSB) {
-			if (extUSB) {
-				// Disable PWM when external device using USB data lines is connected
-				desklamp_set_led(1, ON);
-				desklamp_config_channel(1, DISABLE);
-			} else {
-				// Enable PWM
-				desklamp_init_pwm();
+		uint8_t extUSB = 0;
+		if (desklamp_is_adapter()) {
+			extUSB = desklamp_chk_extusb();
+			if (extUSB != lastExtUSB) {
+				if (extUSB) {
+					// Disable PWM when external device using USB data lines is connected
+					desklamp_set_led(1, ON);
+					desklamp_config_channel(1, DISABLE);
+				} else {
+					// Enable PWM
+					desklamp_init_pwm();
+				}
+				lastExtUSB = extUSB;
 			}
-			lastExtUSB = extUSB;
 		}
 
 		// check ext_usb device
 		if (!extUSB) {
-#endif
-
 			// desklamp statemachine
 			switch (desklamp_get_state()) {
 				case DESKLAMP_STATE_IDLE:
@@ -345,6 +359,9 @@ int main(void) {
 							break;
 						case DESKLAMP_CMD_SET_COLORMODE:
 							desklamp_set_colormode(buffer[1]);
+							break;
+						case DESKLAMP_CMD_SET_ADAPTER:
+							desklamp_set_adapter(buffer[1]);
 							break;
 						case DESKLAMP_CMD_SET_SERIAL:
 							desklamp_set_serial((uint32_t)buffer[1] << 24 | (uint32_t)buffer[2] << 16 | (uint32_t)buffer[3] << 8 | (uint32_t)buffer[4]);
@@ -384,9 +401,7 @@ int main(void) {
 				TIFR0 |= (1 << TOV0); // Reset Interrupt flag
 			}
 #endif
-#if USBADAPTER == 1
 		}
-#endif
 	}
 	return 0;
 

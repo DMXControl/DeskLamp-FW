@@ -37,6 +37,7 @@
  */
 #define DESKLAMP_CMD_SET_LED		1
 #define DESKLAMP_CMD_SET_COLORMODE	5
+#define DESKLAMP_CMD_SET_ADAPTER	11
 #define DESKLAMP_CMD_SET_RGB		3
 #define DESKLAMP_CMD_SET_STROBE		4
 #define DESKLAMP_CMD_SET_DIMMER		2
@@ -44,6 +45,7 @@
 
 #define DESKLAMP_CMD_GET_RGB		7
 #define DESKLAMP_CMD_GET_COLORMODE	8
+#define DESKLAMP_CMD_IS_ADAPTER		12
 #define DESKLAMP_CMD_GET_DIMMER		6
 #define DESKLAMP_CMD_GET_EXTUSB		9
 /** @} */
@@ -87,6 +89,7 @@ typedef struct {
 	uint8_t blackout;
 	uint8_t usb_ext;		/** ext USB check */
 	uint32_t serial;
+	uint8_t isAdapter;
 }desklamp_t;
 
 
@@ -99,12 +102,14 @@ void desklamp_set_led_intensity(uint8_t led, uint8_t intensity);
 void desklamp_set_rgb(uint8_t r, uint8_t g, uint8_t b);
 void desklamp_set_dimmer(uint8_t dimmer);
 void desklamp_set_colormode(uint8_t colormode);
+void desklamp_set_adapter(uint8_t isAdapter);
 void desklamp_set_serial(uint32_t serial);
 void desklamp_set_strobe(uint8_t strobe);
 void desklamp_set_blackout(uint8_t blackout);
 void desklamp_set_state(uint8_t state);
 uint8_t desklamp_get_state(void);
 uint8_t desklamp_get_colormode(void);
+uint8_t desklamp_is_adapter(void);
 uint32_t desklamp_get_serial(void);
 uint8_t desklamp_get_rgb(char c);
 uint8_t desklamp_get_dimmer(void);
