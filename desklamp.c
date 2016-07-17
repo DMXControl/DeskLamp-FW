@@ -17,6 +17,7 @@
 
 #define SERIAL_EEPROM_STORE		0
 #define COLORMODE_EEPROM_STORE	4
+#define ADAPTER_EEPROM_STORE	5
 
 static desklamp_t desklamp;
 
@@ -61,6 +62,11 @@ void desklamp_init(void) {
 	desklamp.colormode = eeprom_read_byte((unsigned char *)COLORMODE_EEPROM_STORE);
 	if (desklamp.colormode == 0xFF) {
 		desklamp_set_colormode(COLORMODE);
+	}
+
+	desklamp.isAdapter = eeprom_read_byte((unsigned char *)ADAPTER_EEPROM_STORE);
+	if (desklamp.isAdapter == 0xFF) {
+		desklamp_set_adapter(USBADAPTER);
 	}
 
 	eeprom_read_block(&desklamp.serial, (unsigned char *)SERIAL_EEPROM_STORE, 4);
@@ -243,6 +249,15 @@ void desklamp_set_colormode(uint8_t colormode){
 	eeprom_write_byte((unsigned char *)COLORMODE_EEPROM_STORE, desklamp.colormode);
 }
 
+/**
+ *  @brief      Set adapter
+ *  @param    	isAdapter (0, 1)
+*/
+void desklamp_set_adapter(uint8_t isAdapter){
+	desklamp.isAdapter = isAdapter ? 1 : 0;
+	eeprom_write_byte((unsigned char *)ADAPTER_EEPROM_STORE, desklamp.isAdapter);
+}
+
 void desklamp_set_serial(uint32_t serial) {
 	desklamp.serial = serial;
 	eeprom_write_block(&desklamp.serial, (unsigned char *)SERIAL_EEPROM_STORE, 4);
@@ -300,6 +315,14 @@ uint8_t desklamp_get_state(void){
 */
 uint8_t desklamp_get_colormode(void){
 	return desklamp.colormode;
+}
+
+/**
+ *  @brief      Is this DeskLamp an adapter?
+ *  @return		1 = adapter, 0 = directly connected LEDs
+*/
+uint8_t desklamp_is_adapter(void){
+	return desklamp.isAdapter;
 }
 
 /**
