@@ -15,7 +15,7 @@
 * Fuses:
 *  High: 0xDF
 *  Low:  0xEE
-*  Extended: 0xFF
+*  Extended: 0xFE
 */
 
 #include <avr/signature.h>
@@ -33,7 +33,7 @@
 FUSES = {
 	.low = 0xEE,
 	.high = 0xDF,
-	.extended = 0xFF,
+	.extended = 0xFE,
 };
 
 static uchar buffer[8];
